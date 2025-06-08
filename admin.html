@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Let's Review - Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0; min-height: 100vh;
+    color: #f8f9fa;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1rem;
+    position: relative;
+  }
+  header {
+    font-weight: 600;
+    font-size: 1.8rem;
+    margin: 1rem 0 1rem 0;
+    text-align: center;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    width: 100%;
+  }
+  main {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    transition: background-color 0.3s ease;
+  }
+  main.drag-over {
+    background: rgba(255 255 255 / 0.3);
+    border: 2px dashed #ffd369;
+  }
+  label, button, input {
+    font-weight: 600;
+  }
+  label {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  input[type="file"] {
+    font-family: monospace, monospace;
+    background: rgba(0,0,0,0.2);
+    color: #f8f9fa;
+    border-radius: 6px;
+    border: none;
+    padding: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  input[type="number"] {
+    width: 4rem;
+    text-align: center;
+  }
+  button {
+    background: #5a60ff;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 1rem;
+  }
+  button:disabled {
+    background: #888;
+    cursor: not-allowed;
+  }
+  button:hover:not(:disabled) {
+    background: #474edb;
+  }
+  #shuffleContainer {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  #shuffleBtn {
+    background: #ff6b6b;
+  }
+  #shuffleBtn:hover:not(:disabled) {
+    background: #2f1212;
+  }
+  #linkContainer {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  #generatedLink {
+    margin-top: 0.5rem;
+    color: #ffd369;
+    width: 80%;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: none;
+    background: rgba(0,0,0,0.3);
+    user-select: all;
+  }
+  #questionCountContainer, #timerSettings {
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+  #signature {
+    margin-top: 1.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ccc;
+    font-style: italic;
+    text-align: center;
+  }
+  #toolsBtn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #1abc9c;
+    color: #0b1446;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(26,188,156,0.5);
+    transition: background 0.3s ease;
+    z-index: 1000;
+  }
+  #toolsBtn:hover {
+    background: #16a085;
+    box-shadow: 0 6px 16px rgba(22,160,133,0.7);
+  }
+  #log {
+    font-family: monospace;
+    font-size: 0.9rem;
+    margin-top:1rem;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  #openLinkBtn {
+    background: #37b24d;
+    margin-left: 0.5rem;
+  }
+  #openLinkBtn:hover:not(:disabled) {
+    background: #2f9e44;
+  }
+  #hiddenInputsContainer {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.3);
+  }
+  #toggleManualBtn {
+    background: #ffae42;
+    color: #1b1b1b;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+  }
+  #toggleManualBtn:hover {
+    background: #e09917;
+  }
+</style>
+</head>
+<body>
+<header>Let's Review - Admin</header>
+
+<button id="toolsBtn" title="Go to Tools Front Page" type="button">Tools</button>
+
+<main id="dropArea" aria-label="File upload section, supports drag and drop" tabindex="0">
+
+  <label for="unifiedFileInput" style="display:block; margin-bottom: 0.5rem; font-weight: 700; cursor:pointer;">
+    Upload Files (.json, .pdf, .doc, .docx)
+  </label>
+  <input
+    type="file"
+    id="unifiedFileInput"
+    accept=".json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    multiple
+    aria-describedby="materialStatus"
+  />
+
+  <button id="toggleManualBtn" aria-pressed="false" aria-controls="hiddenInputsContainer" type="button">
+    Show Manual File Inputs
+  </button>
+
+  <div id="hiddenInputsContainer" aria-hidden="true">
+    <label for="questionsFileInput">Upload Questions File (.json, .pdf, .doc, .docx):</label>
+    <input
+      type="file"
+      id="questionsFileInput"
+      accept=".json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    />
+
+    <label for="choicesFileInput">Upload Multiple Choices File (.json, .pdf, .doc, .docx):</label>
+    <input
+      type="file"
+      id="choicesFileInput"
+      accept=".json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    />
+
+    <label for="answersFileInput">Upload Key Answers File (.json, .pdf, .doc, .docx):</label>
+    <input
+      type="file"
+      id="answersFileInput"
+      accept=".json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    />
+  </div>
+
+  <button id="processFilesBtn" disabled type="button">Process Files</button>
+
+  <div id="timerSettings">
+    <label for="timerHours">Timer Hours (max 24):</label>
+    <input type="number" id="timerHours" value="0" min="0" max="24" />
+    <label for="timerMinutes">Minutes:</label>
+    <input type="number" id="timerMinutes" value="5" min="0" max="59" />
+  </div>
+
+  <div id="questionCountContainer">
+    <label for="questionCountInput">Number of Questions (max 1000):</label>
+    <input type="number" id="questionCountInput" value="50" min="1" max="1000" />
+  </div>
+
+  <div id="shuffleContainer" style="text-align:center;">
+    <button id="shuffleBtn" disabled type="button">Shuffle Questions</button>
+  </div>
+
+  <div id="materialStatus" role="status" aria-live="polite" aria-atomic="true" style="margin-top:0.5rem;min-height:1.2rem;">
+    No files loaded.
+  </div>
+
+  <div id="prepareTestContainer" style="margin-top:1rem; text-align:center;">
+    <button id="prepareTestBtn" disabled type="button">Prepare Test</button>
+  </div>
+
+  <div id="linkContainer" style="display:none; text-align:center;">
+    <label for="generatedLink">Share this test with your testers:</label><br />
+    <input type="text" id="generatedLink" readonly aria-readonly="true" />
+    <button id="copyLinkBtn" type="button">Copy Link</button>
+    <button id="openLinkBtn" type="button">Open Link</button>
+  </div>
+
+  <div id="log" aria-live="polite" aria-atomic="true" role="log" tabindex="0"></div>
+
+  <div id="signature">by: Sweetgwapa</div>
+</main>
+
+<!-- PDF.js library -->
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.14.305/build/pdf.min.js"></script>
+<!-- Mammoth.js library for DOCX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+
+<script>
+  /* Variables */
+  const unifiedFileInput = document.getElementById('unifiedFileInput');
+  const questionsFileInput = document.getElementById('questionsFileInput');
+  const choicesFileInput = document.getElementById('choicesFileInput');
+  const answersFileInput = document.getElementById('answersFileInput');
+  const processFilesBtn = document.getElementById('processFilesBtn');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const prepareTestBtn = document.getElementById('prepareTestBtn');
+  const materialStatus = document.getElementById('materialStatus');
+  const linkContainer = document.getElementById('linkContainer');
+  const generatedLinkInput = document.getElementById('generatedLink');
+  const copyLinkBtn = document.getElementById('copyLinkBtn');
+  const logDiv = document.getElementById('log');
+  const toolsBtn = document.getElementById('toolsBtn');
+  const openLinkBtn = document.getElementById('openLinkBtn');
+  const dropArea = document.getElementById('dropArea');
+  const toggleManualBtn = document.getElementById('toggleManualBtn');
+  const hiddenInputsContainer = document.getElementById('hiddenInputsContainer');
+  const timerHours = document.getElementById('timerHours');
+  const timerMinutes = document.getElementById('timerMinutes');
+  const questionCountInput = document.getElementById('questionCountInput');
+
+  let questions = [];
+  let questionCount = 50;
+
+  function log(text){
+    const now = new Date().toLocaleTimeString();
+    logDiv.textContent += `[${now}] ${text}\n`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  function filesToFileList(filesArray){
+    const dt = new DataTransfer();
+    filesArray.forEach(f => dt.items.add(f));
+    return dt.files;
+  }
+
+  function assignFilesToInputs(files){
+    let questionsFile = null;
+    let choicesFile = null;
+    let answersFile = null;
+
+    Array.from(files).forEach(file => {
+      const name = file.name.toLowerCase();
+      if (!questionsFile && name.includes('question')) questionsFile = file;
+      else if (!choicesFile && (name.includes('choice') || name.includes('multiple'))) choicesFile = file;
+      else if (!answersFile && (name.includes('answer') || name.includes('key'))) answersFile = file;
+    });
+
+    let assignedAny = false;
+
+    if (questionsFile) {
+      questionsFileInput.files = filesToFileList([questionsFile]);
+      log(`Questions file assigned: ${questionsFile.name}`);
+      assignedAny = true;
+    }
+
+    if (choicesFile) {
+      choicesFileInput.files = filesToFileList([choicesFile]);
+      log(`Choices file assigned: ${choicesFile.name}`);
+      assignedAny = true;
+    }
+
+    if (answersFile) {
+      answersFileInput.files = filesToFileList([answersFile]);
+      log(`Answers file assigned: ${answersFile.name}`);
+      assignedAny = true;
+    }
+
+    if (assignedAny) {
+      checkFilesSelected();
+    } else {
+      log('No valid files identified.');
+      alert('Please include keywords "question", "choice"/"multiple", or "answer"/"key" in filenames.');
+    }
+  }
+
+  function checkFilesSelected(){
+    const allSelected = 
+      questionsFileInput.files.length === 1 &&
+      choicesFileInput.files.length === 1 &&
+      answersFileInput.files.length === 1;
+    processFilesBtn.disabled = !allSelected;
+  }
+
+  unifiedFileInput.addEventListener('change', (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
+      processFilesBtn.disabled = true;
+      log('No files selected.');
+      return;
+    }
+    assignFilesToInputs(files);
+    unifiedFileInput.value = '';
+  });
+
+  [questionsFileInput, choicesFileInput, answersFileInput].forEach(input => {
+    input.addEventListener('change', checkFilesSelected);
+  });
+
+  toggleManualBtn.addEventListener('click', () => {
+    const isVisible = hiddenInputsContainer.style.display === 'block';
+    if (isVisible) {
+      hiddenInputsContainer.style.display = 'none';
+      toggleManualBtn.setAttribute('aria-pressed', 'false');
+      toggleManualBtn.textContent = 'Show Manual File Inputs';
+      hiddenInputsContainer.setAttribute('aria-hidden', 'true');
+    } else {
+      hiddenInputsContainer.style.display = 'block';
+      toggleManualBtn.setAttribute('aria-pressed', 'true');
+      toggleManualBtn.textContent = 'Hide Manual File Inputs';
+      hiddenInputsContainer.setAttribute('aria-hidden', 'false');
+    }
+  });
+
+  questionCountInput.addEventListener('input', () => {
+    let val = parseInt(questionCountInput.value);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > 1000) val = 1000;
+    questionCountInput.value = val;
+    questionCount = val;
+    updatePrepareBtnState();
+  });
+
+  function validateTimerInputs() {
+    const h = parseInt(timerHours.value);
+    const m = parseInt(timerMinutes.value);
+    if (isNaN(h) || h < 0 || h > 24) return false;
+    if (isNaN(m) || m < 0 || m > 59) return false;
+    if (h === 0 && m === 0) return false;
+    return true;
+  }
+
+  timerHours.addEventListener('input', () => {
+    if (parseInt(timerHours.value) > 24) timerHours.value = 24;
+    else if (parseInt(timerHours.value) < 0) timerHours.value = 0;
+    updatePrepareBtnState();
+  });
+
+  timerMinutes.addEventListener('input', () => {
+    if (parseInt(timerMinutes.value) > 59) timerMinutes.value = 59;
+    else if (parseInt(timerMinutes.value) < 0) timerMinutes.value = 0;
+    updatePrepareBtnState();
+  });
+
+  function updatePrepareBtnState() {
+    const validTimer = validateTimerInputs();
+    prepareTestBtn.disabled = !(questions.length > 0 && validTimer);
+  }
+
+  async function extractTextFromPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(item => item.str).join(' ');
+      fullText += pageText + '\n';
+    }
+    return fullText;
+  }
+
+  async function extractTextFromDocx(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        mammoth.extractRawText({ arrayBuffer: event.target.result }).then(result => {
+          resolve(result.value);
+        }).catch(err => reject(new Error('Mammoth parsing error: ' + err.message)));
+      };
+      reader.onerror = () => reject(new Error('Failed to read file ' + file.name));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  async function extractTextFromFile(file) {
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.pdf')) return await extractTextFromPDF(file);
+    if (name.endsWith('.doc') || name.endsWith('.docx')) return await extractTextFromDocx(file);
+    if (name.endsWith('.json')) return await file.text();
+    throw new Error('Unsupported file type: ' + file.name);
+  }
+
+  // ENHANCED parseNumberedList allowing flexible spaces and multiline content
+  function parseNumberedList(text) {
+    const lines = text.split(/\r?\n/);
+    const map = new Map();
+    let currentNum = null;
+    let currentContentLines = [];
+
+    // Regex: number + optional spaces + punctuation + optional spaces + content
+    const itemRegex = /^\s*(\d+)\s*[\.\)\-\–]\s*(.*)$/;
+
+    for (let line of lines) {
+      const match = line.match(itemRegex);
+      if (match) {
+        // Save previous item if exists
+        if (currentNum !== null) {
+          const fullContent = currentContentLines.join(' ').trim();
+          if(fullContent){
+            map.set(currentNum, fullContent);
+          } else {
+            console.warn(`Warning: empty content for item number ${currentNum}. Skipped.`);
+          }
+        }
+        currentNum = match[1];
+        const firstLineContent = match[2].trim();
+        currentContentLines = firstLineContent ? [firstLineContent] : [];
+      } else if (currentNum !== null) {
+        if (line.trim()) {
+          currentContentLines.push(line.trim());
+          console.info(`Info: appending continuation line to item number ${currentNum}.`);
+        }
+      }
+    }
+    // Save last item
+    if (currentNum !== null) {
+      const fullContent = currentContentLines.join(' ').trim();
+      if(fullContent){
+        map.set(currentNum, fullContent);
+      } else {
+        console.warn(`Warning: empty content for item number ${currentNum}. Skipped.`);
+      }
+    }
+    return map;
+  }
+
+  // ENHANCED parseNumberedChoices allowing flexible spaces and multiline choices
+  function parseNumberedChoices(text) {
+    const lines = text.split(/\r?\n/);
+    const map = new Map();
+    let currentNum = null;
+    let currentChoices = [];
+
+    const choiceRegex = /^\s*(\d+)\s*[\.\)\-\–]\s*(.*)$/;
+
+    for (let line of lines) {
+      const match = line.match(choiceRegex);
+      if (match) {
+        if (currentNum !== null) {
+          if(currentChoices.length === 0){
+            console.warn(`Warning: no choices found for question number ${currentNum}.`);
+          }
+          map.set(currentNum, currentChoices);
+        }
+        currentNum = match[1];
+        const firstChoice = match[2].trim();
+        currentChoices = firstChoice ? [firstChoice] : [];
+      } else if (currentNum !== null) {
+        if (line.trim()) {
+          currentChoices.push(line.trim());
+          console.info(`Info: appending continuation choice line for question number ${currentNum}.`);
+        }
+      }
+    }
+    if (currentNum !== null) {
+      if(currentChoices.length === 0){
+        console.warn(`Warning: no choices found for question number ${currentNum}.`);
+      }
+      map.set(currentNum, currentChoices);
+    }
+    return map;
+  }
+
+  // Enhanced parseAnswerValue allowing flexible spaces
+  function parseAnswerValue(text) {
+    const match = text.match(/^\s*\d+\s*[\.\)\-\–]\s*(.+)$/);
+    if (!match) return null;
+    return match[1].trim();
+  }
+
+  async function processFiles(){
+    processFilesBtn.disabled = true;
+    shuffleBtn.disabled = true;
+    prepareTestBtn.disabled = true;
+    materialStatus.textContent = 'Processing files...';
+    log('Processing the uploaded files.');
+    try {
+      const questionsFile = questionsFileInput.files[0];
+      const choicesFile = choicesFileInput.files[0];
+      const answersFile = answersFileInput.files[0];
+
+      const questionsTextRaw = await extractTextFromFile(questionsFile);
+      const choicesTextRaw = await extractTextFromFile(choicesFile);
+      const answersTextRaw = await extractTextFromFile(answersFile);
+
+      const questionsMap = parseNumberedList(typeof questionsTextRaw === 'string' ? questionsTextRaw : JSON.stringify(questionsTextRaw));
+      const choicesMap = typeof choicesTextRaw === 'string' ? parseNumberedChoices(choicesTextRaw) : new Map();
+      const answersMap = parseNumberedList(typeof answersTextRaw === 'string' ? answersTextRaw : JSON.stringify(answersTextRaw));
+
+      if(questionsMap.size === 0) throw new Error('No valid questions found.');
+      if(choicesMap.size === 0) throw new Error('No valid choices found.');
+      if(answersMap.size === 0) throw new Error('No valid answers found.');
+
+      questions = [];
+      for(let [num, qText] of questionsMap){
+        if(!choicesMap.has(num)) throw new Error(`Choices missing for question number ${num}`);
+        if(!answersMap.has(num)) throw new Error(`Answer missing for question number ${num}`);
+
+        const opts = choicesMap.get(num);
+        if(!Array.isArray(opts)) throw new Error(`Choices for question ${num} must be an array.`);
+
+        const ansRaw = answersMap.get(num);
+        let answerIndex = null;
+
+        if(/^\d+$/.test(ansRaw)){
+          const idx = parseInt(ansRaw, 10);
+          if(idx < 0 || idx >= opts.length) throw new Error(`Answer index out of range for question ${num}`);
+          answerIndex = idx;
+        } else if(/^[A-Za-z]$/.test(ansRaw)){
+          const idx = ansRaw.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0);
+          if(idx < 0 || idx >= opts.length) throw new Error(`Answer letter out of range for question ${num}`);
+          answerIndex = idx;
+        } else {
+          throw new Error(`Unsupported answer format for question ${num}: "${ansRaw}"`);
+        }
+
+        questions.push({
+          question: qText,
+          options: opts,
+          answerIndex: answerIndex
+        });
+      }
+
+      if(questions.length === 0) throw new Error('No questions prepared after processing.');
+
+      materialStatus.textContent = `Processed and prepared ${questions.length} questions.`;
+      log(`Processed ${questions.length} questions.`);
+
+      shuffleBtn.disabled = false;
+      updatePrepareBtnState();
+
+    } catch(e){
+      questions = [];
+      materialStatus.textContent = 'Error processing files.';
+      log('Error: ' + e.message);
+      alert('Failed to process files: ' + e.message);
+      shuffleBtn.disabled = true;
+      prepareTestBtn.disabled = true;
+    } finally {
+      processFilesBtn.disabled = false;
+    }
+  }
+
+  processFilesBtn.addEventListener('click', processFiles);
+
+  function shuffleQuestions() {
+    for(let i = questions.length -1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+    log('Questions shuffled.');
+  }
+
+  shuffleBtn.addEventListener('click', () => {
+    shuffleQuestions();
+    updatePrepareBtnState();
+  });
+
+  prepareTestBtn.addEventListener('click', () => {
+    if(questions.length === 0) {
+      alert('No questions loaded.');
+      return;
+    }
+    if(!validateTimerInputs()){
+      alert('Please set a valid timer (max 24 hrs, max 59 mins, cannot be 0).');
+      return;
+    }
+    const count = parseInt(questionCountInput.value);
+    if(!(count >=1 && count <= 1000)) {
+      alert('Number of questions must be between 1 and 1000.');
+      return;
+    }
+    const limitedQuestions = questions.slice(0, count);
+    const totalSeconds = parseInt(timerHours.value) * 3600 + parseInt(timerMinutes.value) * 60;
+    const testData = {
+      questions: limitedQuestions,
+      timeLimitSeconds: totalSeconds,
+      createdAt: Date.now()
+    };
+    try {
+      localStorage.setItem('preparedTestData', JSON.stringify(testData));
+      log('Test prepared and saved.');
+      const urlBase = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
+      const testerURL = urlBase + 'examinee.html';
+      generatedLinkInput.value = testerURL;
+      linkContainer.style.display = 'block';
+      alert('Test prepared successfully! Copy the shareable link below to distribute to examinees.');
+    } catch(e) {
+      alert('Failed to save test data: ' + e.message);
+      log('Error saving test: ' + e.message);
+    }
+  });
+
+  copyLinkBtn.addEventListener('click', () => {
+    generatedLinkInput.select();
+    document.execCommand('copy');
+    alert('Link copied to clipboard!');
+  });
+
+  openLinkBtn.addEventListener('click', () => {
+    const url = generatedLinkInput.value;
+    if(url) {
+      window.open(url, '_blank', 'noopener');
+    } else {
+      alert('No link available to open.');
+    }
+  });
+
+  toolsBtn.addEventListener('click', () => {
+    window.location.href = "Tools-front-page.html";
+  });
+
+  dropArea.addEventListener('dragenter', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.add('drag-over');
+  });
+  dropArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.add('drag-over');
+  });
+  dropArea.addEventListener('dragleave', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.remove('drag-over');
+  });
+  dropArea.addEventListener('drop', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.remove('drag-over');
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0){
+      assignFilesToInputs(e.dataTransfer.files);
+    }
+  });
+
+  // Disable buttons on load
+  processFilesBtn.disabled = true;
+  shuffleBtn.disabled = true;
+  prepareTestBtn.disabled = true;
+  linkContainer.style.display = 'none';
+</script>
+</body>
+</html>
